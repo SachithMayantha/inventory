@@ -41,4 +41,34 @@ public class InventoryController {
     public void delete(@PathVariable int id) {
         inventoryService.delete(id);
     }
+
+    @GetMapping("low-stock")
+    public int countLowStockItems() {
+        return inventoryService.countLowStockItems();
+    }
+
+    @GetMapping("expiring-soon")
+    public int countExpiringSoonItems() {
+        return inventoryService.countExpiringSoonItems();
+    }
+
+    @GetMapping("available")
+    public int countAvailableItems() {
+        return inventoryService.countAvailableInventory();
+    }
+
+    @GetMapping("low-stock-all")
+    public List<InventoryDto> findLowStockItems() {
+        return inventoryService.findByStatus("Low Stock");
+    }
+
+    @GetMapping("expiring-soon-all")
+    public List<InventoryDto> findExpiringSoonItems() {
+        return inventoryService.findByStatus("Expiring Soon");
+    }
+
+    @GetMapping("out-of-stock-all")
+    public List<InventoryDto> findOutOfStockItems() {
+        return inventoryService.findByStatus("Out of Stock");
+    }
 }

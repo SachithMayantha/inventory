@@ -6,11 +6,11 @@ import com.fernando.inventory.service.OrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
 @RequestMapping("order")
-@CrossOrigin
 @AllArgsConstructor
 public class OrderController {
 
@@ -39,5 +39,10 @@ public class OrderController {
     @DeleteMapping("{order_id}")
     public void deleteOrder(@PathVariable int order_id) {
         orderService.delete(order_id);
+    }
+
+    @GetMapping("inventory-value")
+    public BigDecimal getTotalDeliveredOrderAmount(){
+        return orderService.getTotalDeliveredOrderAmount();
     }
 }

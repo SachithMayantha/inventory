@@ -34,6 +34,7 @@ import {
   checkApiAvailability,
   fetchData,
   postData,
+  putData,
 } from "@/lib/api-service";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -80,7 +81,9 @@ export function OrdersList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [isNewOrderDialogOpen, setIsNewOrderDialogOpen] = useState(false);
+  const [isEditOrderDialogOpen, setIsEditOrderDialogOpen] = useState(false);
   const [supplierNames, setSupplierNames] = useState<SupplierName[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [newOrder, setNewOrder] = useState({
     name: "",
     category: "Pantry",
@@ -150,8 +153,9 @@ export function OrdersList() {
     return matchesSearch;
   });
 
-  const handleRowClick = (id: string) => {
-    router.push(`/dashboard/orders/${id}`);
+  const handleRowClick = (order: Order) => {
+    setSelectedOrder(order);
+    setIsEditOrderDialogOpen(true);
   };
 
   const getStatusColor = (status: string) => {
@@ -221,6 +225,52 @@ export function OrdersList() {
       unit: "Kg",
       price: "",
     });
+  };
+
+  const handleUpdateOrder = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      // Prepare the update data with all required fields
+      const updateData = {
+        order_id: selectedOrder.order_id,
+        name: selectedOrder.name,
+        category: selectedOrder.category,
+        supplier: selectedOrder.supplier,
+        created: selectedOrder.created,
+        delivery: selectedOrder.delivery,
+        status: selectedOrder.status,
+        quantity: selectedOrder.quantity,
+        unit: selectedOrder.unit,
+        price: selectedOrder.price,
+      };
+
+      // Call the update API endpoint using putData
+      const response = await putData("/order/update", updateData);
+
+      if (response) {
+        toast({
+          title: "Success",
+          description: "Order updated successfully",
+        });
+
+        // Refresh the orders list
+        const updatedOrders = await fetchData<Order[]>("/order/getAll");
+        if (updatedOrders && Array.isArray(updatedOrders)) {
+          setOrders(updatedOrders);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to update order:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update order",
+        variant: "destructive",
+      });
+    }
+
+    setIsEditOrderDialogOpen(false);
+    setSelectedOrder(null);
   };
 
   return (
@@ -483,7 +533,7 @@ export function OrdersList() {
                   <TableRow
                     key={order.order_id}
                     className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleRowClick(order.order_id)}
+                    onClick={() => handleRowClick(order)}
                   >
                     <TableCell className="font-medium">
                       {order.order_id}
@@ -516,6 +566,158 @@ export function OrdersList() {
           </Table>
         </div>
       </CardContent>
+
+      {/* Edit Order Dialog */}
+      <Dialog
+        open={isEditOrderDialogOpen}
+        onOpenChange={setIsEditOrderDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Order</DialogTitle>
+            <DialogDescription>
+              Update the order details. Some fields cannot be modified.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Order ID</Label>
+                <Input
+                  value={selectedOrder.order_id}
+                  disabled
+                  className="col-span-3 bg-gray-100"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Item Name</Label>
+                <Input
+                  value={selectedOrder.name}
+                  disabled
+                  className="col-span-3 bg-gray-100"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Category</Label>
+                <Input
+                  value={selectedOrder.category}
+                  disabled
+                  className="col-span-3 bg-gray-100"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Supplier</Label>
+                <Input
+                  value={selectedOrder.supplier}
+                  disabled
+                  className="col-span-3 bg-gray-100"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Created</Label>
+                <Input
+                  value={new Date(selectedOrder.created).toLocaleDateString()}
+                  disabled
+                  className="col-span-3 bg-gray-100"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-delivery" className="text-right">
+                  Delivery Date
+                </Label>
+                <Input
+                  id="edit-delivery"
+                  type="date"
+                  value={selectedOrder.delivery}
+                  onChange={(e) =>
+                    setSelectedOrder({
+                      ...selectedOrder,
+                      delivery: e.target.value,
+                    })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-status" className="text-right">
+                  Status
+                </Label>
+                <Select
+                  value={selectedOrder.status}
+                  onValueChange={(value) =>
+                    setSelectedOrder({
+                      ...selectedOrder,
+                      status: value as Order["status"],
+                    })
+                  }
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Requested">Requested</SelectItem>
+                    <SelectItem value="In Transit">In Transit</SelectItem>
+                    <SelectItem value="Delivered">Delivered</SelectItem>
+                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-quantity" className="text-right">
+                  Quantity
+                </Label>
+                <Input
+                  id="edit-quantity"
+                  type="number"
+                  value={selectedOrder.quantity}
+                  onChange={(e) =>
+                    setSelectedOrder({
+                      ...selectedOrder,
+                      quantity: e.target.value,
+                    })
+                  }
+                  className="col-span-2"
+                />
+                <Input
+                  value={selectedOrder.unit}
+                  disabled
+                  className="bg-gray-100"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-price" className="text-right">
+                  Price
+                </Label>
+                <Input
+                  id="edit-price"
+                  type="number"
+                  step="0.01"
+                  value={selectedOrder.price}
+                  onChange={(e) =>
+                    setSelectedOrder({
+                      ...selectedOrder,
+                      price: e.target.value,
+                    })
+                  }
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEditOrderDialogOpen(false);
+                setSelectedOrder(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateOrder}>Update Order</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

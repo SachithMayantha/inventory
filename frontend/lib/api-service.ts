@@ -70,8 +70,8 @@ export async function postData<T>(endpoint: string, data: any, options?: any): P
   }
 }
 
-// Generic function to update data
-export async function updateData<T>(endpoint: string, data: any, options?: any): Promise<T | null> {
+// Generic function to update data with PUT method
+export async function putData<T>(endpoint: string, data: any, options?: any): Promise<T | null> {
   try {
     const response = await api.put(endpoint, data, options);
     return response as T;
@@ -123,7 +123,7 @@ export const apiService = {
     return postData("/inventory", data)
   },
   updateInventoryItem: async (id: string, data: any) => {
-    return updateData(`/inventory/${id}`, data)
+    return putData(`/inventory/${id}`, data)
   },
   deleteInventoryItem: async (id: string) => {
     return deleteData(`/inventory/${id}`)
@@ -140,7 +140,7 @@ export const apiService = {
     return postData("/recipes", data)
   },
   updateRecipe: async (id: string, data: any) => {
-    return updateData(`/recipes/${id}`, data)
+    return putData(`/recipes/${id}`, data)
   },
   deleteRecipe: async (id: string) => {
     return deleteData(`/recipes/${id}`)
@@ -157,7 +157,7 @@ export const apiService = {
     return postData("/orders", data)
   },
   updateOrder: async (id: string, data: any) => {
-    return updateData(`/orders/${id}`, data)
+    return putData(`/orders/${id}`, data)
   },
   deleteOrder: async (id: string) => {
     return deleteData(`/orders/${id}`)

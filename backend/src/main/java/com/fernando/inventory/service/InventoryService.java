@@ -45,4 +45,21 @@ public class InventoryService {
         assert inventory != null;
         inventoryRepository.delete(inventory);
     }
+
+    public int countLowStockItems(){
+        return inventoryRepository.countLowStockItems();
+    }
+
+    public int countExpiringSoonItems(){
+        return inventoryRepository.countExpiringSoonItems();
+    }
+
+    public int countAvailableInventory(){
+        return inventoryRepository.countAvailableInventory();
+    }
+
+    public List<InventoryDto> findByStatus(String status) {
+        List<Inventory> inventoryList = inventoryRepository.findByStatus(status);
+        return inventoryList.stream().map(InventoryMapper::mapToInventoryDto).collect(Collectors.toList());
+    }
 }

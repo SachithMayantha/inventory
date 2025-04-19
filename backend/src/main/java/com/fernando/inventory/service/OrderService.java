@@ -7,6 +7,7 @@ import com.fernando.inventory.repository.OrderRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,5 +56,9 @@ public class OrderService {
 
     public void delete(int id) {
         orderRepository.deleteById(id);
+    }
+
+    public BigDecimal getTotalDeliveredOrderAmount(){
+        return orderRepository.getTotalDeliveredOrderAmount();
     }
 }
