@@ -28,7 +28,6 @@ const links: SidebarLink[] = [
     title: "Inventory",
     href: "/dashboard/inventory",
     icon: Package,
-    badge: 3,
   },
   // {
   //   title: "Recipes",

@@ -22,10 +22,10 @@ export function DashboardHeader() {
         <p className="text-muted-foreground">Welcome back, Chef! Here's what's happening with your inventory today.</p>
       </div>
       <div className="flex items-center gap-2">
-        <div className="relative md:w-64">
+        {/* <div className="relative md:w-64">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input type="search" placeholder="Search inventory..." className="w-full bg-white pl-8" />
-        </div>
+        </div> */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" className="relative">
